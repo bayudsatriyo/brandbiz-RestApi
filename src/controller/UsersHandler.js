@@ -15,4 +15,19 @@ const registerUsersHandler = async (req, res, next) => {
   }
 };
 
-export default { registerUsersHandler };
+const authenticationHandler = async (req, res, next) => {
+  try {
+    const dataLogin = req.body;
+
+    const result = await usersService.authentication(dataLogin);
+
+    res.status(200).json({
+      status: 'SUCCESS',
+      data: result,
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export default { registerUsersHandler, authenticationHandler };
