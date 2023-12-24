@@ -20,6 +20,23 @@ model User {
   role String? @db.VarChar(50)
   profileUrl  String? @db.Text
   token String? @db.VarChar(100)
-  
+  learningpath userhaslearning[]
+
   @@map("users")
+}
+
+model Learningpath {
+  id Int @id @default(autoincrement())
+  judul String @unique @db.VarChar(100)
+  users userhaslearning[]
+}
+
+model userhaslearning {
+  user User @relation(fields: [useremail], references: [email])
+  useremail String
+  learningpath Learningpath @relation(fields: [learningId], references: [id])
+  learningId Int
+  assignedAt DateTime @default(now())
+  
+  @@id([useremail, learningId])
 }
