@@ -30,4 +30,54 @@ const authenticationHandler = async (req, res, next) => {
   }
 };
 
-export default { registerUsersHandler, authenticationHandler };
+const getUserByTokenHandler = async (req, res, next) => {
+  try {
+    const userdata = req.user;
+
+    const result = await usersService.getUserByToken(userdata);
+
+    res.status(200).json({
+      data: result,
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+const updateUserHandler = async (req, res, next) => {
+  try {
+    const userdata = req.body;
+    const useremail = req.user.email;
+
+    const result = await usersService.updateUser(userdata, useremail);
+
+    res.status(200).json({
+      status: 'SUCCESS',
+      data: result,
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+const logoutUserHandler = async (req, res, next) => {
+  try {
+    const useremail = req.user.email;
+    const result = await usersService.logoutUser(useremail);
+    console.log(result);
+    res.status(200).json({
+      status: 'LOGOUT',
+      message: `akun ${result.username} berhasil logout`,
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export default {
+  registerUsersHandler,
+  authenticationHandler,
+  getUserByTokenHandler,
+  updateUserHandler,
+  logoutUserHandler,
+};

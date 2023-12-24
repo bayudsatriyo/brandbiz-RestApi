@@ -11,11 +11,12 @@ const addUsers = async (users) => {
   const CekUser = await prismaClient.user.count({
     where: {
       username: user.username,
+      email: user.email,
     },
   });
 
   if (CekUser === 1) {
-    throw new ResponseError(400, 'Username sudah digunakan');
+    throw new ResponseError(400, 'Username atau email sudah digunakan');
   }
   console.log(user.password);
   user.password = await bcrypt.hash(user.password, 10);
@@ -31,7 +32,6 @@ const addUsers = async (users) => {
 };
 
 const authentication = async (users) => {
-  console.log(users);
   const userData = validate(usersValidation.loginUserValidation, users);
 
   const cekUser = await prismaClient.user.findUnique({
@@ -49,7 +49,8 @@ const authentication = async (users) => {
   }
 
   const isPasswordValid = await bcrypt.compare(userData.password, cekUser.password);
-  console.log(isPasswordValid);
+  console.log(cekUser);
+  console.log(userData);
   if (!isPasswordValid) {
     throw new ResponseError(404, 'Username atau Password salah / tidak ditemukan');
   }
@@ -63,9 +64,69 @@ const authentication = async (users) => {
       username: cekUser.username,
     },
     select: {
-      token,
+      token: true,
     },
   });
 };
 
-export default { addUsers, authentication };
+const getUserByToken = async (user) => {
+  console.log(user);
+  const userData = await prismaClient.user.findUnique({
+    where: {
+      email: user.email,
+    },
+    select: {
+      email: true,
+      username: true,
+      fullname: true,
+      alamat: true,
+      role: true,
+      profileUrl: true,
+    },
+  });
+
+  if (!userData) {
+    throw new ResponseError(404, 'User tidak ditemukan');
+  }
+
+  return userData;
+};
+
+const updateUser = async (userdata, useremail) => {
+  const user = validate(usersValidation.updateValidation, userdata);
+
+  return prismaClient.user.update({
+    where: {
+      email: useremail,
+    },
+    data: user,
+    select: {
+      email: true,
+      username: true,
+      fullname: true,
+      alamat: true,
+      role: true,
+      profileUrl: true,
+    },
+  });
+};
+
+const logoutUser = async (useremail) => {
+  const email = validate(usersValidation.emailValidation, useremail);
+
+  return prismaClient.user.update({
+    where: {
+      email,
+    },
+    data: {
+      token: null,
+    },
+    select: {
+      username: true,
+    },
+  });
+};
+
+export default {
+  addUsers, authentication, getUserByToken, updateUser, logoutUser,
+};
