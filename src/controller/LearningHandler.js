@@ -28,8 +28,7 @@ const getImage = async (req, res, next) => {
     console.log(image);
     // Tentukan path gambar di folder lokal
     const __dirname = dirname(fileURLToPath(import.meta.url));
-    // const imagePath = `<span class="math-inline">\{\_\_dirname\}/src/uploads/</span>{image}`;
-     // Cek apakah file gambar ada
+    
      const filePath = path.join(__dirname, '..', 'uploads', image);
      res.sendFile(filePath);
     }catch(e){
